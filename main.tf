@@ -14,6 +14,8 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
+
+#Terraform sample to create EC2 instance
 resource "aws_instance" "web" {
   ami           = data.aws_ami.app_ami.id
   instance_type = "t3.nano"
@@ -21,4 +23,9 @@ resource "aws_instance" "web" {
   tags = {
     Name = "HelloWorld"
   }
+}
+
+#Terraform sample to create ECR instance
+resource "aws_ecr_repository" "example" {
+  name = "terra-repo" # replace with your desired repository name
 }
