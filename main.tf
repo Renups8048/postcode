@@ -3,6 +3,22 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
 # Variables
 variable "app_name" {
   default = "terra-ecs-app"
@@ -56,7 +72,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 # Create an EC2 launch configuration
 resource "aws_launch_configuration" "ecs_lc" {
   name_prefix                 = "${var.app_name}-"
-  image_id                    = "ami-0c55b159cbfafe1f0"
+  image_id                    = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   iam_instance_profile        = "ecsInstanceRole"
   security_groups             = [aws_security_group.ecs_sg.id]
