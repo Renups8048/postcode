@@ -1,2 +1,2 @@
 # practice
-Just to test the github functionalities
+Terrafor practice with github connection and AWS secrets
