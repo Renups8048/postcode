@@ -56,6 +56,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 # Create an EC2 launch configuration
 resource "aws_launch_configuration" "ecs_lc" {
   name_prefix                 = "${var.app_name}-"
+  image_id                    = "ami-0c55b159cbfafe1f0"
   instance_type               = "t2.micro"
   iam_instance_profile        = "ecsInstanceRole"
   security_groups             = [aws_security_group.ecs_sg.id]
