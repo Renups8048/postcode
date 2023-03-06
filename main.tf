@@ -98,3 +98,22 @@ resource "aws_ecr_repository" "ecs_repo" {
   }
 }
 
+resource "aws_ecs_task_definition" "ecs_task" {
+  family                   = "${var.app_name}-tesk-def"
+  container_definitions    = jsonencode([
+    {
+      name  = "${var.app_name}-container"
+      image = "${aws_ecr_repository.ecs_repo.repository_url}:latest"
+      portMappings = [
+        {
+          containerPort = 8080
+          hostPort      = 8080
+        }
+      ]
+    }
+  ])
+  requires_compatibilities = ["EC2"]
+  cpu                      = "256"
+  memory                   = "512"
+}
+
