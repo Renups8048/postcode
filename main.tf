@@ -98,6 +98,7 @@ resource "aws_ecr_repository" "ecs_repo" {
   }
 }
 
+#AWS ECS cluster task definition 
 resource "aws_ecs_task_definition" "ecs_task" {
   family                   = "${var.app_name}-tesk-def"
   container_definitions    = jsonencode([
@@ -117,3 +118,22 @@ resource "aws_ecs_task_definition" "ecs_task" {
   memory                   = "512"
 }
 
+#AWS ECS cluster service
+resource "aws_ecs_service" "example_service" {
+  name            = "example-service"
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  task_definition = aws_ecs_task_definition.ecs_task.arn
+  desired_count   = 1
+
+  network_configuration {
+    assign_public_ip = true
+
+    security_groups = [
+      aws_security_group.ecs_sg.id,
+    ]
+
+    subnets = [
+      aws_subnet.ecs_subnet.id
+    ]
+  }
+}
