@@ -133,18 +133,18 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
+    'filters': {
+        'exclude_static_files': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': lambda record: not record.args[0].startswith('/static/'),
+        },
+    },
     'loggers': {
         'django.request': {
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': True,
             'filters': ['exclude_static_files'],
-        },
-    },
-    'filters': {
-        'exclude_static_files': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': lambda record: not record.request.path.startswith('/static/'),
         },
     },
 }
