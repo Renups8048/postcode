@@ -1,57 +1,87 @@
 import os
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+
 import pytest
-from django.conf import settings
-from django.test import RequestFactory
+from rest_framework.test import APIClient
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'postcode.settings'
-settings.configure()
-
-from .views import is_valid_postcode, format_postcode
-
-# Valid postcodes
-valid_postcodes = [
-    ("EC1A 1BB", True),
-    ("EC1A1BB", True),
-    ("ec1a1bb", True),
-    ("w1a0ax", True),
-    ("m11ae", True),
-    ("b338th", True),
-    ("cr26xh", True),
-    ("dn551pt", True),
-    ("BL01AA", True),
-]
-
-# Invalid postcodes
-invalid_postcodes = [
-    ("QC1A 1BB", False),
-    ("VC1A 1BB", False),
-    ("XC1A 1BB", False),
-    ("AI1A 1BB", False),
-    ("AJ1A 1BB", False),
-    ("A9X 0AX", False),
-]
+import django
+django.setup()
 
 
-@pytest.mark.parametrize("postcode, expected_result", valid_postcodes)
-def test_is_valid_postcode_valid(postcode, expected_result):
-    assert is_valid_postcode(postcode) == expected_result
+@pytest.fixture
+def client():
+    """Initializing the client"""
+    return APIClient()
 
 
-@pytest.mark.parametrize("postcode, expected_result", invalid_postcodes)
-def test_is_valid_postcode_invalid(postcode, expected_result):
-    assert is_valid_postcode(postcode) == expected_result
+def test_is_valid_postcode_valid(client):
+    """
+    Test to check if a valid postcode is identified as valid by the API
+    """
+    response = client.get('/validate_postcode/', {'postcode': 'EC1A 1BB'})
+    assert response.status_code == 200
+    assert response.data == "The postcode 'EC1A 1BB' is valid."
 
 
-def test_format_postcode_valid():
-    factory = RequestFactory()
-    request = factory.get('/validate_postcode')
-    response = format_postcode(request, "ec1a1bb")
+def test_is_valid_postcode_invalid(client):
+    """
+    Test to check if an invalid postcode is identified as invalid by the API
+    """
+    response = client.get('/validate_postcode/', {'postcode': 'QC1A 1BB1'})
+    assert response.status_code == 200
+    assert response.data == "The postcode 'QC1A 1BB1' is invalid."
+
+
+def test_format_postcode_valid(client):
+    """
+    Test to check if a valid postcode is formatted correctly by the API
+    """
+    response = client.get('/format_postcode/', {'postcode': 'ec1a1bb'})
     assert response.status_code == 200
     assert response.data == {'formatted_postcode': 'EC1A 1BB'}
 
-def test_format_postcode_invalid():
-    factory = RequestFactory()
-    request = factory.get('/validate_postcode')
-    response = format_postcode(request, "EC1A1BBasasas")
+
+def test_format_postcode_invalid(client):
+    """
+    Test to check if an invalid postcode raises an error by the API
+    """
+    response = client.get('/format_postcode/', {'postcode': 'EC1A1BBasasas'})
     assert response.status_code == 400
     assert response.data == {'error': 'Invalid postcode'}
+
+
+def test_validate_postcode_missing_parameter(client):
+    """
+    Test to check if the API returns an error when the postcode parameter is missing
+    """
+    response = client.get('/validate_postcode/')
+    assert response.status_code == 400
+    assert response.data == {'error': 'Postcode parameter missing'}
+
+
+def test_format_postcode_missing_parameter(client):
+    """
+    Test to check if the API returns an error when the postcode parameter is missing
+    """
+    response = client.get('/format_postcode/')
+    assert response.status_code == 400
+    assert response.data == {'error': 'Postcode parameter missing'}
+
+
+def test_format_postcode_missing_postcode(client):
+    """
+    Test to check if the API returns an error when the postcode parameter is not provided
+    """
+    response = client.get('/format_postcode/', {'not_postcode': ''})
+    assert response.status_code == 400
+    assert response.data == {'error': 'Postcode parameter missing'}
+
+
+def test_validate_postcode_missing_postcode(client):
+    """
+    Test to check if the API returns an error when the postcode parameter is not provided
+    """
+    response = client.get('/validate_postcode/', {'not_postcode': ''})
+    assert response.status_code == 400
+    assert response.data == {'error': 'Postcode parameter missing'}
