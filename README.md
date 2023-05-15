@@ -19,6 +19,10 @@ These steps explain how to run the code locally and interact with API's.
 
 - Run your code with `python manage.py runserver`
 
-## Testing
-- For validating API  run `http://127.0.0.1:8000/api/validate/?postcode=SW1A2WS`
-- For Formating API run `http://127.0.0.1:8000/api/format/?postcode=SW1A2WS`
+## Testing locally
+- For validating API  run `http://localhost:8000/validate_postcode/?postcode=SW1A2WS`
+- For Formating API run `http://localhost:8000/format_postcode/?postcode=SW1A2WS`
+
+## Test code
+- Run your code with `pytest postcode_validator/tests.py`
+
