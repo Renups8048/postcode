@@ -12,7 +12,11 @@ def validate_postcode(request):
     if not postcode:
         return Response({'error': 'Postcode parameter missing'})
     is_valid = is_valid_postcode(postcode)
-    return Response({'valid': is_valid})
+    if is_valid:
+        return Response(f"The postcode '{postcode}' is valid.")
+    else:
+        return Response(f"The postcode '{postcode}' is invalid.")
+
 
 @api_view(['GET'])
 def format_postcode(request):
